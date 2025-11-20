@@ -1,0 +1,55 @@
+CalorieTracker/
+├── package.json
+├── metro.config.js
+├── babel.config.js
+├── index.js
+├── App.js
+├── src/
+│   ├── components/
+│   │   ├── common/
+│   │   │   ├── Button.js
+│   │   │   ├── Input.js
+│   │   │   ├── LoadingSpinner.js
+│   │   │   └── Card.js
+│   │   ├── food/
+│   │   │   ├── FoodCard.js
+│   │   │   ├── NutritionChart.js
+│   │   │   ├── FoodSearchBar.js
+│   │   │   └── CalorieProgress.js
+│   │   └── camera/
+│   │       ├── CameraView.js
+│   │       └── ImagePreview.js
+│   ├── screens/
+│   │   ├── auth/
+│   │   │   ├── LoginScreen.js
+│   │   │   ├── RegisterScreen.js
+│   │   │   └── ProfileSetupScreen.js
+│   │   ├── main/
+│   │   │   ├── HomeScreen.js
+│   │   │   ├── CameraScreen.js
+│   │   │   ├── SearchScreen.js
+│   │   │   ├── LogScreen.js
+│   │   │   └── ProfileScreen.js
+│   │   └── analytics/
+│   │       ├── AnalyticsScreen.js
+│   │       └── ProgressScreen.js
+│   ├── services/
+│   │   ├── api.js
+│   │   ├── auth.js
+│   │   ├── food.js
+│   │   ├── camera.js
+│   │   └── storage.js
+│   ├── context/
+│   │   ├── AuthContext.js
+│   │   └── FoodContext.js
+│   ├── navigation/
+│   │   ├── AppNavigator.js
+│   │   ├── AuthNavigator.js
+│   │   └── MainTabNavigator.js
+│   ├── utils/
+│   │   ├── constants.js
+│   │   ├── helpers.js
+│   │   └── validation.js
+│   └── assets/
+│       ├── images/
+│       └── icons/
