@@ -1,71 +1,59 @@
 from flask import Blueprint, request, jsonify
-from flask_jwt_extended import jwt_required, get_jwt_identity
-from werkzeug.utils import secure_filename
+from flask_jwt_extended import jwt_required
+from datetime import datetime
 from app import db
-from models.user import User
 from models.food_log import FoodLog
 from models.custom_food import CustomFood
-from services.openai_service import OpenAIService
-from utils.helpers import save_uploaded_image
-import base64
+from services.auth_service import get_current_user_id
+from utils.helpers import save_uploaded_image, allowed_file
+import os
 import json
-from datetime import datetime, date
+import base64
 
 food_bp = Blueprint('food', __name__)
-openai_service = OpenAIService()
 
 @food_bp.route('/analyze-image', methods=['POST'])
 @jwt_required()
-def analyze_food_image():
+def analyze_food_image_route():
     """Analyze food image using OpenAI Vision API"""
     try:
-        user_id = get_jwt_identity()
+        user_id = get_current_user_id()
         
         # Check if image is provided
-        if 'image' not in request.files and 'image_base64' not in request.form:
+        if 'image' not in request.files:
             return jsonify({'error': 'No image provided'}), 400
         
-        user_description = request.form.get('description', '')
+        image_file = request.files['image']
+        if image_file.filename == '':
+            return jsonify({'error': 'No image selected'}), 400
         
-        # Handle file upload or base64 image
-        if 'image' in request.files:
-            image_file = request.files['image']
-            if image_file.filename == '':
-                return jsonify({'error': 'No image selected'}), 400
-            
-            # Save image and get base64
-            image_path = save_uploaded_image(image_file, user_id)
-            image_data = image_file.read()
-            image_base64 = base64.b64encode(image_data).decode('utf-8')
-        else:
-            # Handle base64 image from mobile app
-            image_base64 = request.form.get('image_base64')
-            image_path = None
+        print(f"Received image: {image_file.filename}")
+        
+        # Read image and convert to base64
+        image_data = image_file.read()
+        image_base64 = base64.b64encode(image_data).decode('utf-8')
+        
+        print(f"Image size: {len(image_data)} bytes")
         
         # Analyze image with OpenAI
-        analysis_result = openai_service.analyze_food_image(image_base64, user_description)
+        from services.openai_service import analyze_food_image
+        analysis_result = analyze_food_image(image_base64)
         
-        if 'error' in analysis_result:
+        if not analysis_result:
             return jsonify({
                 'error': 'Failed to analyze image',
-                'details': analysis_result['error']
+                'details': 'OpenAI returned no results'
             }), 500
         
-        # Format response for frontend
-        response = {
-            'analysis': analysis_result,
-            'suggestions': {
-                'food_name': analysis_result.get('food_name'),
-                'estimated_calories': analysis_result.get('nutrition', {}).get('calories'),
-                'confidence': analysis_result.get('confidence_score'),
-                'serving_description': analysis_result.get('serving_description')
-            },
-            'image_path': image_path
-        }
+        print(f"Analysis result: {analysis_result}")
         
-        return jsonify(response), 200
+        # Return formatted response
+        return jsonify(analysis_result), 200
         
     except Exception as e:
+        print(f"Error analyzing image: {e}")
+        import traceback
+        traceback.print_exc()
         return jsonify({
             'error': 'Failed to analyze image', 
             'details': str(e)
@@ -83,7 +71,7 @@ def search_food():
             return jsonify({'error': 'Search query is required'}), 400
         
         # Search in user's custom foods first
-        user_id = get_jwt_identity()
+        user_id = get_current_user_id()
         custom_foods = CustomFood.query.filter(
             CustomFood.user_id == user_id,
             CustomFood.name.ilike(f'%{query}%')
@@ -111,7 +99,7 @@ def search_food():
 def log_food():
     """Log consumed food"""
     try:
-        user_id = get_jwt_identity()
+        user_id = get_current_user_id()
         data = request.get_json()
         
         # Validate required fields
@@ -161,7 +149,7 @@ def log_food():
 def get_food_logs():
     """Get user's food logs with optional date filtering"""
     try:
-        user_id = get_jwt_identity()
+        user_id = get_current_user_id()
         
         # Parse query parameters
         date_str = request.args.get('date')  # YYYY-MM-DD format
@@ -227,7 +215,7 @@ def get_food_logs():
 def delete_food_log(log_id):
     """Delete a food log entry"""
     try:
-        user_id = get_jwt_identity()
+        user_id = get_current_user_id()
         
         food_log = FoodLog.query.filter_by(id=log_id, user_id=user_id).first()
         if not food_log:
@@ -250,7 +238,7 @@ def delete_food_log(log_id):
 def update_food_log(log_id):
     """Update a food log entry"""
     try:
-        user_id = get_jwt_identity()
+        user_id = get_current_user_id()
         data = request.get_json()
         
         food_log = FoodLog.query.filter_by(id=log_id, user_id=user_id).first()
@@ -288,7 +276,7 @@ def update_food_log(log_id):
 def create_custom_food():
     """Create a custom food entry"""
     try:
-        user_id = get_jwt_identity()
+        user_id = get_current_user_id()
         data = request.get_json()
         
         # Validate required fields

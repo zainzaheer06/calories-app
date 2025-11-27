@@ -1,0 +1,6 @@
+@echo off
+echo Adding Windows Firewall rule for Flask on port 5000...
+netsh advfirewall firewall add rule name="Python Flask 5000" dir=in action=allow protocol=TCP localport=5000
+echo.
+echo Done! Press any key to exit...
+pause

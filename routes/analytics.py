@@ -1,5 +1,6 @@
 from flask import Blueprint, request, jsonify
-from flask_jwt_extended import jwt_required, get_jwt_identity
+from flask_jwt_extended import jwt_required
+from services.auth_service import get_current_user_id
 from app import db
 from models.user import User
 from models.food_log import FoodLog
@@ -13,7 +14,7 @@ analytics_bp = Blueprint('analytics', __name__)
 def get_daily_analytics(date_str):
     """Get daily nutrition analytics for a specific date"""
     try:
-        user_id = get_jwt_identity()
+        user_id = get_current_user_id()
         user = User.query.get(user_id)
         
         if not user:
@@ -108,7 +109,7 @@ def get_daily_analytics(date_str):
 def get_weekly_analytics():
     """Get weekly nutrition analytics"""
     try:
-        user_id = get_jwt_identity()
+        user_id = get_current_user_id()
         user = User.query.get(user_id)
         
         if not user:
@@ -189,13 +190,23 @@ def get_weekly_analytics():
 def get_monthly_analytics():
     """Get monthly nutrition analytics"""
     try:
-        user_id = get_jwt_identity()
+        user_id = get_current_user_id()
         
         # Get month (default to current month)
-        month_str = request.args.get('month')  # Format: YYYY-MM
-        if month_str:
+        # Support both formats: month="YYYY-MM" or year=YYYY&month=MM
+        month_str = request.args.get('month')
+        year_param = request.args.get('year')
+        month_param = request.args.get('month') if not month_str else None
+        
+        if month_str and '-' in str(month_str):
+            # Format: YYYY-MM
             year, month = map(int, month_str.split('-'))
+        elif year_param and month_param:
+            # Format: year=YYYY&month=MM
+            year = int(year_param)
+            month = int(month_param)
         else:
+            # Default to current month
             today = date.today()
             year, month = today.year, today.month
         
@@ -274,7 +285,7 @@ def get_monthly_analytics():
 def get_summary():
     """Get overall user analytics summary"""
     try:
-        user_id = get_jwt_identity()
+        user_id = get_current_user_id()
         user = User.query.get(user_id)
         
         if not user:
@@ -356,12 +367,78 @@ def get_summary():
             'details': str(e)
         }), 500
 
+@analytics_bp.route('/ai-insights/<date_str>', methods=['GET'])
+@jwt_required()
+def get_ai_insights(date_str):
+    """Get AI-powered nutrition insights for a specific date"""
+    try:
+        user_id = get_current_user_id()
+        user = User.query.get(user_id)
+        
+        if not user:
+            return jsonify({'error': 'User not found'}), 404
+        
+        # Parse date
+        try:
+            target_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+        except ValueError:
+            return jsonify({'error': 'Invalid date format. Use YYYY-MM-DD'}), 400
+        
+        # Get food logs for the date
+        food_logs = FoodLog.query.filter(
+            FoodLog.user_id == user_id,
+            func.date(FoodLog.consumed_at) == target_date
+        ).all()
+        
+        if not food_logs:
+            return jsonify({
+                'insights': 'No meals logged for this date. Start tracking your meals to get personalized AI insights!'
+            }), 200
+        
+        # Prepare data for OpenAI
+        from services.openai_service import get_nutrition_advice
+        
+        user_data = {
+            'age': user.age,
+            'weight': user.weight,
+            'height': user.height,
+            'gender': user.gender,
+            'goal_type': user.goal_type,
+            'activity_level': user.activity_level,
+            'daily_calorie_goal': user.daily_calorie_goal
+        }
+        
+        food_data = [{
+            'food_name': log.food_name,
+            'meal_type': log.meal_type,
+            'total_calories': log.total_calories(),
+            'proteins': log.proteins * log.servings_consumed,
+            'carbs': log.carbs * log.servings_consumed,
+            'fats': log.fats * log.servings_consumed,
+            'fiber': log.fiber * log.servings_consumed
+        } for log in food_logs]
+        
+        # Get AI insights
+        insights = get_nutrition_advice(user_data, food_data)
+        
+        return jsonify({
+            'date': date_str,
+            'insights': insights,
+            'meals_analyzed': len(food_logs)
+        }), 200
+        
+    except Exception as e:
+        return jsonify({
+            'error': 'Failed to get AI insights', 
+            'details': str(e)
+        }), 500
+
 @analytics_bp.route('/progress', methods=['GET'])
 @jwt_required()
 def get_progress():
     """Get progress analytics over time"""
     try:
-        user_id = get_jwt_identity()
+        user_id = get_current_user_id()
         user = User.query.get(user_id)
         
         if not user:

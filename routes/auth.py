@@ -1,10 +1,17 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
+from datetime import datetime
 from app import db
 from models.user import User
 from utils.validators import validate_email, validate_password
 
 auth_bp = Blueprint('auth', __name__)
+
+@auth_bp.route('/test', methods=['GET'])
+def test():
+    """Simple test endpoint"""
+    print("\n=== TEST ENDPOINT HIT ===")
+    return jsonify({'message': 'Backend is reachable!', 'timestamp': str(datetime.now())}), 200
 
 @auth_bp.route('/register', methods=['POST'])
 def register():
@@ -49,8 +56,8 @@ def register():
         db.session.add(user)
         db.session.commit()
         
-        # Create access token
-        access_token = create_access_token(identity=user.id)
+        # Create access token (convert user.id to string for JWT)
+        access_token = create_access_token(identity=str(user.id))
         
         return jsonify({
             'message': 'User registered successfully',
@@ -65,20 +72,30 @@ def register():
 @auth_bp.route('/login', methods=['POST'])
 def login():
     """Authenticate user and return access token"""
+    print("\n" + "="*50)
+    print("LOGIN REQUEST RECEIVED")
+    print("="*50)
+    
     try:
         data = request.get_json()
+        print(f"Request data: {data}")
+        print(f"Request headers: {dict(request.headers)}")
         
         if not all(k in data for k in ['email', 'password']):
+            print("ERROR: Missing email or password")
             return jsonify({'error': 'Missing email or password'}), 400
         
         # Find user by email
         user = User.query.filter_by(email=data['email'].lower().strip()).first()
+        print(f"User found: {user is not None}")
         
         if not user or not user.check_password(data['password']):
+            print("ERROR: Invalid credentials")
             return jsonify({'error': 'Invalid email or password'}), 401
         
-        # Create access token
-        access_token = create_access_token(identity=user.id)
+        # Create access token (convert user.id to string for JWT)
+        access_token = create_access_token(identity=str(user.id))
+        print(f"Login successful for user: {user.email}")
         
         return jsonify({
             'message': 'Login successful',
@@ -87,6 +104,9 @@ def login():
         }), 200
         
     except Exception as e:
+        print(f"EXCEPTION: {str(e)}")
+        import traceback
+        traceback.print_exc()
         return jsonify({'error': 'Login failed', 'details': str(e)}), 500
 
 @auth_bp.route('/profile', methods=['GET'])
@@ -100,7 +120,7 @@ def get_profile():
         if not user:
             return jsonify({'error': 'User not found'}), 404
         
-        return jsonify({'user': user.to_dict()}), 200
+        return jsonify({'profile': user.to_dict()}), 200
         
     except Exception as e:
         return jsonify({'error': 'Failed to get profile', 'details': str(e)}), 500

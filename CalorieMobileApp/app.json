@@ -1,0 +1,20 @@
+{
+  "expo": {
+    "name": "Calorie Tracker",
+    "slug": "calorie-mobile-app",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "resizeMode": "contain",
+      "backgroundColor": "#4CAF50"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.calorietracker.app"
+    },
+    "android": {
+      "package": "com.calorietracker.app"
+    }
+  }
+}

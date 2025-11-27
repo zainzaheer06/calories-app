@@ -1,10 +1,16 @@
 import os
 import uuid
-from PIL import Image
 from werkzeug.utils import secure_filename
 from datetime import datetime
 import base64
 from io import BytesIO
+
+# Try to import Pillow, but handle if not installed
+try:
+    from PIL import Image
+    PILLOW_AVAILABLE = True
+except ImportError:
+    PILLOW_AVAILABLE = False
 
 # Allowed image extensions
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}

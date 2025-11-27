@@ -1,5 +1,6 @@
 from flask import Blueprint, request, jsonify
-from flask_jwt_extended import jwt_required, get_jwt_identity
+from flask_jwt_extended import jwt_required
+from services.auth_service import get_current_user_id
 from app import db
 from models.user import User
 from models.food_log import FoodLog
@@ -13,7 +14,7 @@ user_bp = Blueprint('user', __name__)
 def get_user_profile():
     """Get detailed user profile with statistics"""
     try:
-        user_id = get_jwt_identity()
+        user_id = get_current_user_id()
         user = User.query.get(user_id)
         
         if not user:
@@ -56,7 +57,7 @@ def get_user_profile():
 def update_user_profile():
     """Update user profile information"""
     try:
-        user_id = get_jwt_identity()
+        user_id = get_current_user_id()
         user = User.query.get(user_id)
         
         if not user:
@@ -122,7 +123,7 @@ def update_user_profile():
 def update_user_goals():
     """Update user goals and preferences"""
     try:
-        user_id = get_jwt_identity()
+        user_id = get_current_user_id()
         user = User.query.get(user_id)
         
         if not user:
@@ -180,7 +181,7 @@ def update_user_goals():
 def get_user_custom_foods():
     """Get user's custom food items"""
     try:
-        user_id = get_jwt_identity()
+        user_id = get_current_user_id()
         
         # Get query parameters
         category = request.args.get('category')
@@ -224,7 +225,7 @@ def get_user_custom_foods():
 def get_user_preferences():
     """Get user preferences and settings"""
     try:
-        user_id = get_jwt_identity()
+        user_id = get_current_user_id()
         user = User.query.get(user_id)
         
         if not user:
@@ -255,7 +256,7 @@ def get_user_preferences():
 def delete_user_account():
     """Delete user account and all associated data"""
     try:
-        user_id = get_jwt_identity()
+        user_id = get_current_user_id()
         user = User.query.get(user_id)
         
         if not user:

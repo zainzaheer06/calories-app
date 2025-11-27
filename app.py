@@ -15,7 +15,7 @@ def create_app():
     # Initialize extensions with app
     db.init_app(app)
     jwt.init_app(app)
-    CORS(app)
+    CORS(app, resources={r"/api/*": {"origins": "*"}}, supports_credentials=True)
     
     # Import and register blueprints
     from routes.auth import auth_bp
