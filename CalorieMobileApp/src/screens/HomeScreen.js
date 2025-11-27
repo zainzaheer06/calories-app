@@ -89,7 +89,7 @@ export default function HomeScreen() {
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
     >
       <View style={styles.header}>
-        <Text style={styles.greeting}>Hello, {user?.name || 'User'}! 👋</Text>
+        <Text style={styles.greeting}>Hello, {user?.name || 'User'}!</Text>
         <Text style={styles.date}>{new Date().toLocaleDateString('en-US', { 
           weekday: 'long', 
           year: 'numeric', 
@@ -147,15 +147,6 @@ export default function HomeScreen() {
         </View>
       )}
 
-      {/* Camera Scanner Button - Centered */}
-      <TouchableOpacity 
-        style={styles.cameraButton}
-        onPress={() => navigation.navigate('ImprovedCameraScanner')}
-      >
-        <Text style={styles.cameraButtonIcon}>📷</Text>
-        <Text style={styles.cameraButtonText}>Scan Food with Camera</Text>
-      </TouchableOpacity>
-
       {/* AI Analysis Button */}
       <TouchableOpacity 
         style={styles.aiButton}
@@ -165,38 +156,47 @@ export default function HomeScreen() {
         {aiLoading ? (
           <ActivityIndicator color="#fff" />
         ) : (
-          <>
-            <Text style={styles.aiButtonIcon}>🤖</Text>
-            <Text style={styles.aiButtonText}>Get AI Nutrition Insights</Text>
-          </>
+          <Text style={styles.aiButtonText}>Get AI Nutrition Insights</Text>
         )}
       </TouchableOpacity>
 
       {/* AI Analysis Result */}
       {aiAnalysis && (
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>AI Nutrition Insights 🤖</Text>
+          <Text style={styles.cardTitle}>AI Nutrition Insights</Text>
           <Text style={styles.aiAnalysisText}>{aiAnalysis}</Text>
         </View>
       )}
 
       {/* Recent Meals */}
       <View style={styles.card}>
-        <Text style={styles.cardTitle}>Today's Meals ({foodLogs.length})</Text>
+        <View style={styles.cardHeader}>
+          <Text style={styles.cardTitle}>Today's Meals ({foodLogs.length})</Text>
+          {foodLogs.length > 3 && (
+            <TouchableOpacity
+              onPress={() => navigation.navigate('AllMeals')}
+              style={styles.viewAllButton}
+            >
+              <Text style={styles.viewAllText}>View All</Text>
+            </TouchableOpacity>
+          )}
+        </View>
         {foodLogs.length === 0 ? (
           <Text style={styles.emptyText}>No meals logged yet today</Text>
         ) : (
-          foodLogs.map((log) => (
-            <View key={log.id} style={styles.mealItem}>
-              <View style={styles.mealInfo}>
-                <Text style={styles.mealName}>{log.food_name}</Text>
-                <Text style={styles.mealDetails}>
-                  {log.meal_type} • {Math.round(log.total_calories)} cal
-                </Text>
+          <>
+            {foodLogs.slice(0, 3).map((log) => (
+              <View key={log.id} style={styles.mealItem}>
+                <View style={styles.mealInfo}>
+                  <Text style={styles.mealName}>{log.food_name}</Text>
+                  <Text style={styles.mealDetails}>
+                    {log.meal_type} • {Math.round(log.total_calories)} cal
+                  </Text>
+                </View>
+                <Text style={styles.mealCalories}>{Math.round(log.total_calories)}</Text>
               </View>
-              <Text style={styles.mealCalories}>{Math.round(log.total_calories)}</Text>
-            </View>
-          ))
+            ))}
+          </>
         )}
       </View>
     </ScrollView>
@@ -240,11 +240,29 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 3,
   },
+  cardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 15,
+  },
   cardTitle: {
     fontSize: 18,
     fontWeight: 'bold',
     color: '#333',
-    marginBottom: 15,
+  },
+  viewAllButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    backgroundColor: '#E8F5E9',
+    borderRadius: 20,
+  },
+  viewAllText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#4CAF50',
   },
   progressContainer: {
     alignItems: 'center',
@@ -334,10 +352,6 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 4,
   },
-  aiButtonIcon: {
-    fontSize: 24,
-    marginRight: 10,
-  },
   aiButtonText: {
     color: '#fff',
     fontSize: 16,
@@ -347,29 +361,5 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#333',
     lineHeight: 22,
-  },
-  cameraButton: {
-    backgroundColor: '#2196F3',
-    marginHorizontal: 15,
-    marginVertical: 10,
-    padding: 16,
-    borderRadius: 10,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 4,
-  },
-  cameraButtonIcon: {
-    fontSize: 24,
-    marginRight: 10,
-  },
-  cameraButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
   },
 });

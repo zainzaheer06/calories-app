@@ -7,7 +7,9 @@ import {
   ScrollView,
   Alert,
   SafeAreaView,
+  TouchableOpacity,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { foodAPI } from '../services/api';
 import Button from '../components/Button';
@@ -41,7 +43,7 @@ export default function ImprovedCameraScannerScreen({ navigation }) {
 
     try {
       const result = await ImagePicker.launchCameraAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        mediaTypes: ['images'],
         allowsEditing: true,
         aspect: [4, 3],
         quality: 0.8,
@@ -62,7 +64,7 @@ export default function ImprovedCameraScannerScreen({ navigation }) {
   const pickImage = async () => {
     try {
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        mediaTypes: ['images'],
         allowsEditing: true,
         aspect: [4, 3],
         quality: 0.8,
@@ -106,7 +108,28 @@ export default function ImprovedCameraScannerScreen({ navigation }) {
     } catch (error) {
       console.error('Analysis error:', error);
       
-      // Auto-retry logic
+      // Check if it's a "not food" error
+      if (error.response?.status === 400 && error.response?.data?.is_food === false) {
+        Alert.alert(
+          'Not Food Related',
+          'Sorry, this picture is not food related. Please take a photo of your meal.',
+          [
+            { text: 'Take Another Photo', onPress: () => {
+              setImage(null);
+              setResult(null);
+              takePhoto();
+            }},
+            { text: 'Cancel', style: 'cancel', onPress: () => {
+              setImage(null);
+              setResult(null);
+            }}
+          ]
+        );
+        setAnalyzing(false);
+        return;
+      }
+      
+      // Auto-retry logic for other errors
       if (!isRetry && retryCount < 2) {
         setRetryCount(retryCount + 1);
         setTimeout(() => analyzeImage(imageUri, true), 1000);
@@ -162,10 +185,18 @@ export default function ImprovedCameraScannerScreen({ navigation }) {
       />
 
       <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Header */}
+        {/* Header with Back Button */}
         <View style={styles.header}>
-          <Text style={styles.title}>AI Food Scanner</Text>
-          <Text style={styles.subtitle}>Take a photo to analyze calories instantly</Text>
+          <TouchableOpacity 
+            style={styles.backButton}
+            onPress={() => navigation.goBack()}
+          >
+            <Ionicons name="arrow-back" size={24} color="#fff" />
+          </TouchableOpacity>
+          <View style={styles.headerContent}>
+            <Text style={styles.title}>AI Food Scanner</Text>
+            <Text style={styles.subtitle}>Take a photo to analyze calories instantly</Text>
+          </View>
         </View>
 
         {/* Action Buttons */}
@@ -173,14 +204,12 @@ export default function ImprovedCameraScannerScreen({ navigation }) {
           <View style={styles.buttonContainer}>
             <Button
               title="Take Photo"
-              icon="📷"
               onPress={takePhoto}
               variant="primary"
               style={styles.actionButton}
             />
             <Button
               title="Choose Photo"
-              icon="🖼️"
               onPress={pickImage}
               variant="secondary"
               style={styles.actionButton}
@@ -217,7 +246,7 @@ export default function ImprovedCameraScannerScreen({ navigation }) {
 
             {result.labels && result.labels.length > 0 && (
               <Card>
-                <Text style={styles.labelsTitle}>🏷️ Detected Items</Text>
+                <Text style={styles.labelsTitle}>Detected Items</Text>
                 <View style={styles.labelsContainer}>
                   {result.labels.map((label, index) => (
                     <View key={index} style={styles.labelChip}>
@@ -249,21 +278,21 @@ export default function ImprovedCameraScannerScreen({ navigation }) {
         {/* Instructions */}
         {!image && !analyzing && (
           <Card style={styles.instructionsCard}>
-            <Text style={styles.instructionsTitle}>💡 Tips for Best Results</Text>
+            <Text style={styles.instructionsTitle}>Tips for Best Results</Text>
             <View style={styles.tipItem}>
-              <Text style={styles.tipIcon}>✓</Text>
+              <Text style={styles.tipBullet}>•</Text>
               <Text style={styles.tipText}>Use good lighting</Text>
             </View>
             <View style={styles.tipItem}>
-              <Text style={styles.tipIcon}>✓</Text>
+              <Text style={styles.tipBullet}>•</Text>
               <Text style={styles.tipText}>Take photo from above</Text>
             </View>
             <View style={styles.tipItem}>
-              <Text style={styles.tipIcon}>✓</Text>
+              <Text style={styles.tipBullet}>•</Text>
               <Text style={styles.tipText}>Keep food clearly visible</Text>
             </View>
             <View style={styles.tipItem}>
-              <Text style={styles.tipIcon}>✓</Text>
+              <Text style={styles.tipBullet}>•</Text>
               <Text style={styles.tipText}>Avoid shadows and blur</Text>
             </View>
           </Card>
@@ -284,6 +313,15 @@ const styles = StyleSheet.create({
     paddingTop: 16,
     borderBottomLeftRadius: 24,
     borderBottomRightRadius: 24,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  backButton: {
+    padding: 8,
+    marginRight: 12,
+  },
+  headerContent: {
+    flex: 1,
   },
   title: {
     fontSize: 32,

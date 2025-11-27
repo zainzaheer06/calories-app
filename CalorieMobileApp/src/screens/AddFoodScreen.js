@@ -78,17 +78,8 @@ export default function AddFoodScreen({ navigation }) {
     <ScrollView style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>Add Food</Text>
-        <Text style={styles.subtitle}>Log your meal manually or use camera</Text>
+        <Text style={styles.subtitle}>Log your meal manually</Text>
       </View>
-
-      {/* Camera Scanner Button */}
-      <TouchableOpacity 
-        style={styles.cameraButton}
-        onPress={() => navigation.navigate('ImprovedCameraScanner')}
-      >
-        <Text style={styles.cameraButtonIcon}>📷</Text>
-        <Text style={styles.cameraButtonText}>Scan Food with AI Camera</Text>
-      </TouchableOpacity>
 
       <View style={styles.form}>
         <Text style={styles.label}>Food Name *</Text>
@@ -268,30 +259,6 @@ const styles = StyleSheet.create({
   buttonText: {
     color: '#fff',
     fontSize: 18,
-    fontWeight: 'bold',
-  },
-  cameraButton: {
-    backgroundColor: '#2196F3',
-    marginHorizontal: 15,
-    marginTop: 15,
-    padding: 16,
-    borderRadius: 10,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 4,
-  },
-  cameraButtonIcon: {
-    fontSize: 24,
-    marginRight: 10,
-  },
-  cameraButtonText: {
-    color: '#fff',
-    fontSize: 16,
     fontWeight: 'bold',
   },
 });

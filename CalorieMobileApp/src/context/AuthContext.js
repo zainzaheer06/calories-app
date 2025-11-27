@@ -21,7 +21,9 @@ export const AuthProvider = ({ children }) => {
       }
     } catch (error) {
       console.log('Auth check failed:', error);
+      // Clear invalid token
       await AsyncStorage.removeItem('token');
+      setUser(null);
     } finally {
       setLoading(false);
     }

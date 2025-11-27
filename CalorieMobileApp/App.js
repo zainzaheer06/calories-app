@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { ActivityIndicator, View } from 'react-native';
+import { ActivityIndicator, View, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 // Screens
@@ -13,6 +13,8 @@ import HomeScreen from './src/screens/HomeScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
 import AddFoodScreen from './src/screens/AddFoodScreen';
 import AnalyticsScreen from './src/screens/AnalyticsScreen';
+import SettingsScreen from './src/screens/SettingsScreen';
+import AllMealsScreen from './src/screens/AllMealsScreen';
 import CameraScannerScreen from './src/screens/CameraScannerScreen';
 import ImprovedCameraScannerScreen from './src/screens/ImprovedCameraScannerScreen';
 
@@ -35,6 +37,8 @@ function MainStack() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="MainTabs" component={MainTabs} />
+      <Stack.Screen name="Settings" component={SettingsScreen} />
+      <Stack.Screen name="AllMeals" component={AllMealsScreen} />
       <Stack.Screen name="CameraScanner" component={CameraScannerScreen} />
       <Stack.Screen name="ImprovedCameraScanner" component={ImprovedCameraScannerScreen} />
     </Stack.Navigator>
@@ -42,62 +46,106 @@ function MainStack() {
 }
 
 function MainTabs() {
+  const navigation = useNavigation();
+
   return (
-    <Tab.Navigator
-      screenOptions={({ route }) => ({
-        tabBarActiveTintColor: '#4CAF50',
-        tabBarInactiveTintColor: '#999',
-        headerShown: false,
-        tabBarStyle: {
-          backgroundColor: '#fff',
-          borderTopWidth: 1,
-          borderTopColor: '#e0e0e0',
-          height: 60,
-          paddingBottom: 8,
-          paddingTop: 8,
-        },
-        tabBarLabelStyle: {
-          fontSize: 12,
-          fontWeight: '600',
-        },
-        tabBarIcon: ({ focused, color, size }) => {
-          let iconName;
+    <View style={{ flex: 1 }}>
+      <Tab.Navigator
+        screenOptions={({ route }) => ({
+          tabBarActiveTintColor: '#4CAF50',
+          tabBarInactiveTintColor: '#999',
+          headerShown: false,
+          tabBarStyle: {
+            backgroundColor: '#fff',
+            borderTopWidth: 1,
+            borderTopColor: '#e0e0e0',
+            height: 60,
+            paddingBottom: 8,
+            paddingTop: 8,
+          },
+          tabBarLabelStyle: {
+            fontSize: 12,
+            fontWeight: '600',
+          },
+          tabBarIcon: ({ focused, color, size }) => {
+            let iconName;
 
-          if (route.name === 'Home') {
-            iconName = focused ? 'home' : 'home-outline';
-          } else if (route.name === 'AddFood') {
-            iconName = focused ? 'add-circle' : 'add-circle-outline';
-          } else if (route.name === 'Analytics') {
-            iconName = focused ? 'stats-chart' : 'stats-chart-outline';
-          } else if (route.name === 'Profile') {
-            iconName = focused ? 'person' : 'person-outline';
-          }
+            if (route.name === 'Home') {
+              iconName = focused ? 'home' : 'home-outline';
+            } else if (route.name === 'AddFood') {
+              iconName = focused ? 'restaurant' : 'restaurant-outline';
+            } else if (route.name === 'CameraPlaceholder') {
+              return null; // No icon for placeholder
+            } else if (route.name === 'Analytics') {
+              iconName = focused ? 'stats-chart' : 'stats-chart-outline';
+            } else if (route.name === 'Profile') {
+              iconName = focused ? 'person' : 'person-outline';
+            }
 
-          return <Ionicons name={iconName} size={size} color={color} />;
-        },
-      })}
-    >
-      <Tab.Screen 
-        name="Home" 
-        component={HomeScreen}
-        options={{ tabBarLabel: 'Home' }}
-      />
-      <Tab.Screen 
-        name="AddFood" 
-        component={AddFoodScreen}
-        options={{ tabBarLabel: 'Add Food' }}
-      />
-      <Tab.Screen 
-        name="Analytics" 
-        component={AnalyticsScreen}
-        options={{ tabBarLabel: 'Analytics' }}
-      />
-      <Tab.Screen 
-        name="Profile" 
-        component={ProfileScreen}
-        options={{ tabBarLabel: 'Profile' }}
-      />
-    </Tab.Navigator>
+            return <Ionicons name={iconName} size={size} color={color} />;
+          },
+        })}
+      >
+        <Tab.Screen 
+          name="Home" 
+          component={HomeScreen}
+          options={{ tabBarLabel: 'Home' }}
+        />
+        <Tab.Screen 
+          name="AddFood" 
+          component={AddFoodScreen}
+          options={{ tabBarLabel: 'Add Food' }}
+        />
+        
+        {/* Placeholder for Camera FAB - Creates space in center */}
+        <Tab.Screen 
+          name="CameraPlaceholder" 
+          component={View}
+          options={{ 
+            tabBarLabel: '',
+            tabBarButton: () => <View style={{ width: 70 }} />,
+          }}
+        />
+        
+        <Tab.Screen 
+          name="Analytics" 
+          component={AnalyticsScreen}
+          options={{ tabBarLabel: 'Analytics' }}
+        />
+        <Tab.Screen 
+          name="Profile" 
+          component={ProfileScreen}
+          options={{ tabBarLabel: 'Profile' }}
+        />
+      </Tab.Navigator>
+
+      {/* Floating Camera Button (FAB) */}
+      <TouchableOpacity
+        style={{
+          position: 'absolute',
+          bottom: 30,
+          left: '50%',
+          marginLeft: -35,
+          width: 70,
+          height: 70,
+          borderRadius: 35,
+          backgroundColor: '#4CAF50',
+          justifyContent: 'center',
+          alignItems: 'center',
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.3,
+          shadowRadius: 8,
+          elevation: 8,
+          borderWidth: 4,
+          borderColor: '#fff',
+        }}
+        onPress={() => navigation.navigate('ImprovedCameraScanner')}
+        activeOpacity={0.8}
+      >
+        <Ionicons name="camera" size={32} color="#fff" />
+      </TouchableOpacity>
+    </View>
   );
 }
 

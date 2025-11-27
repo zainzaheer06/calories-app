@@ -1,9 +1,11 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { useAuth } from '../context/AuthContext';
+import { useNavigation } from '@react-navigation/native';
 
 export default function ProfileScreen() {
   const { user, logout } = useAuth();
+  const navigation = useNavigation();
 
   const handleLogout = () => {
     Alert.alert(
@@ -61,6 +63,13 @@ export default function ProfileScreen() {
           <Text style={styles.statValue}>{user?.daily_calorie_goal || 'Not set'} cal</Text>
         </View>
       </View>
+
+      <TouchableOpacity 
+        style={styles.settingsButton} 
+        onPress={() => navigation.navigate('Settings')}
+      >
+        <Text style={styles.settingsText}>Edit Profile & Goals</Text>
+      </TouchableOpacity>
 
       <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
         <Text style={styles.logoutText}>Logout</Text>
@@ -138,9 +147,28 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#333',
   },
+  settingsButton: {
+    backgroundColor: '#2196F3',
+    margin: 15,
+    marginBottom: 10,
+    padding: 16,
+    borderRadius: 10,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  settingsText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
   logoutButton: {
     backgroundColor: '#f44336',
     margin: 15,
+    marginTop: 5,
     padding: 16,
     borderRadius: 10,
     alignItems: 'center',

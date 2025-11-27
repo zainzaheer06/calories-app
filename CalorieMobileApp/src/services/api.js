@@ -31,17 +31,27 @@ api.interceptors.request.use(
   }
 );
 
-// Add response interceptor for debugging
+// Add response interceptor for debugging and token handling
 api.interceptors.response.use(
   (response) => {
     console.log('Response received:', response.status);
     return response;
   },
-  (error) => {
+  async (error) => {
     console.error('Response error:', error.message);
     if (error.response) {
       console.error('Error status:', error.response.status);
       console.error('Error data:', error.response.data);
+      
+      // Handle JWT signature verification failed (422 or 401)
+      if (error.response.status === 422 || error.response.status === 401) {
+        if (error.response.data?.msg?.includes('signature verification failed') || 
+            error.response.data?.msg?.includes('Signature verification failed')) {
+          console.log('Invalid token detected, clearing...');
+          await AsyncStorage.removeItem('token');
+          // Optionally reload the app or redirect to login
+        }
+      }
     } else if (error.request) {
       console.error('No response received:', error.request);
     }
@@ -146,6 +156,7 @@ export const foodAPI = {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
+      timeout: 120000, // 2 minutes for image analysis
     });
     return response.data;
   },
@@ -187,6 +198,7 @@ export const analyticsAPI = {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
+      timeout: 120000, // 2 minutes for image analysis
     });
     return response.data;
   },
