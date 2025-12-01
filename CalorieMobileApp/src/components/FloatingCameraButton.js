@@ -1,5 +1,7 @@
 import React from 'react';
-import { TouchableOpacity, Text, StyleSheet, Animated } from 'react-native';
+import { TouchableOpacity, StyleSheet, Animated } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { colors, shadows } from '../styles/theme';
 
 export default function FloatingCameraButton({ onPress }) {
   const scaleValue = new Animated.Value(1);
@@ -29,7 +31,7 @@ export default function FloatingCameraButton({ onPress }) {
         onPressOut={handlePressOut}
         activeOpacity={0.9}
       >
-        <Text style={styles.icon}>📸</Text>
+        <Ionicons name="camera" size={28} color={colors.white} />
       </TouchableOpacity>
     </Animated.View>
   );
@@ -46,16 +48,9 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 32,
-    backgroundColor: '#4CAF50',
+    backgroundColor: colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#4CAF50',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.4,
-    shadowRadius: 16,
-    elevation: 8,
-  },
-  icon: {
-    fontSize: 28,
+    ...shadows.xl,
   },
 });

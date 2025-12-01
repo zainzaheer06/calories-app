@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
+import { colors, typography } from '../styles/theme';
 
 export default function ProgressCircle({ 
   current, 
@@ -14,10 +15,10 @@ export default function ProgressCircle({
   const strokeDashoffset = circumference - (progress / 100) * circumference;
 
   const getColor = () => {
-    if (progress < 50) return '#4CAF50';
-    if (progress < 90) return '#FF9800';
-    if (progress <= 100) return '#4CAF50';
-    return '#f44336';
+    if (progress < 50) return colors.primary;
+    if (progress < 90) return colors.warning;
+    if (progress <= 100) return colors.primary;
+    return colors.error;
   };
 
   return (
@@ -28,7 +29,7 @@ export default function ProgressCircle({
           cx={size / 2}
           cy={size / 2}
           r={radius}
-          stroke="#E0E0E0"
+          stroke={colors.gray200}
           strokeWidth={strokeWidth}
           fill="none"
         />
@@ -67,16 +68,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   currentText: {
-    fontSize: 48,
-    fontWeight: 'bold',
+    fontSize: typography['3xl'],
+    fontWeight: typography.bold,
   },
   labelText: {
-    fontSize: 14,
-    color: '#666',
+    fontSize: typography.sm,
+    color: colors.textSecondary,
     marginTop: 4,
   },
   unitText: {
-    fontSize: 12,
-    color: '#999',
+    fontSize: typography.xs,
+    color: colors.textSecondary,
   },
 });

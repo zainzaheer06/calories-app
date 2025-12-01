@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, I18nManager } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { Picker } from '@react-native-picker/picker';
 import { useAuth } from '../context/AuthContext';
@@ -14,24 +14,29 @@ export default function ProfileScreen() {
   const [currentLanguage, setCurrentLanguage] = useState(i18n.language);
 
   const changeLanguage = (lang) => {
-    const isRTL = lang === 'ar';
-    const currentRTL = I18nManager.isRTL;
-
-    // Change language first
     i18n.changeLanguage(lang);
     setCurrentLanguage(lang);
-
-    // If RTL setting needs to change, show message to restart app
-    if (isRTL !== currentRTL) {
-      I18nManager.forceRTL(isRTL);
-      Alert.alert(
-        t('success'),
-        `${t('languageChanged')} ${lang === 'en' ? 'English' : 'العربية'}. Please restart the app for RTL to take effect.`
-      );
-    } else {
-      const langName = lang === 'en' ? 'English' : 'العربية';
-      Alert.alert(t('success'), `${t('languageChanged')} ${langName}`);
-    }
+    const langName = lang === 'en' ? 'English' : 'العربية';
+    
+    // For RTL to work, app needs to reload
+    Alert.alert(
+      t('success'), 
+      `${t('languageChanged')} ${langName}\n\nApp will reload for RTL layout.`,
+      [
+        {
+          text: 'OK',
+          onPress: () => {
+            // Reload app for RTL
+            if (lang === 'ar') {
+              require('react-native').I18nManager.forceRTL(true);
+            } else {
+              require('react-native').I18nManager.forceRTL(false);
+            }
+            require('react-native').Updates?.reloadAsync?.();
+          }
+        }
+      ]
+    );
   };
 
   const handleLogout = () => {
@@ -62,15 +67,15 @@ export default function ProfileScreen() {
 
         {/* Language Picker */}
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>{t('language')}</Text>
+          <Text style={styles.cardTitle}>🌐 {t('language')}</Text>
           <View style={styles.pickerContainer}>
             <Picker
               selectedValue={currentLanguage}
               onValueChange={(value) => changeLanguage(value)}
               style={styles.picker}
             >
-              <Picker.Item label="English" value="en" />
-              <Picker.Item label="العربية" value="ar" />
+              <Picker.Item label="🇬🇧 English" value="en" />
+              <Picker.Item label="🇸🇦 العربية" value="ar" />
             </Picker>
           </View>
         </View>

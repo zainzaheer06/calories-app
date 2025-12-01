@@ -6,10 +6,14 @@ import {
   ScrollView,
   TouchableOpacity,
   ActivityIndicator,
+  I18nManager,
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { analyticsAPI } from '../services/api';
 
 export default function AnalyticsScreen() {
+  const { t } = useTranslation();
+  const isRTL = I18nManager.isRTL;
   const [loading, setLoading] = useState(true);
   const [period, setPeriod] = useState('week'); // 'week' or 'month'
   const [data, setData] = useState(null);
@@ -72,14 +76,14 @@ export default function AnalyticsScreen() {
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Analytics</Text>
+        <Text style={styles.title}>{t('analytics.title')}</Text>
         <View style={styles.periodSelector}>
           <TouchableOpacity
             style={[styles.periodButton, period === 'week' && styles.periodButtonActive]}
             onPress={() => setPeriod('week')}
           >
             <Text style={[styles.periodText, period === 'week' && styles.periodTextActive]}>
-              Week
+              {t('analytics.weekly')}
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
@@ -87,7 +91,7 @@ export default function AnalyticsScreen() {
             onPress={() => setPeriod('month')}
           >
             <Text style={[styles.periodText, period === 'month' && styles.periodTextActive]}>
-              Month
+              {t('analytics.monthly')}
             </Text>
           </TouchableOpacity>
         </View>
@@ -96,54 +100,54 @@ export default function AnalyticsScreen() {
       {data && (
         <>
           <View style={styles.card}>
-            <Text style={styles.cardTitle}>Calories</Text>
-            <View style={styles.statRow}>
-              <Text style={styles.statLabel}>Total:</Text>
-              <Text style={styles.statValue}>{Math.round(data.total_calories)} cal</Text>
+            <Text style={styles.cardTitle}>{t('nutrition.calories')}</Text>
+            <View style={[styles.statRow, isRTL && styles.statRowRTL]}>
+              <Text style={styles.statLabel}>{t('analytics.total')}:</Text>
+              <Text style={styles.statValue}>{Math.round(data.total_calories)} {t('analytics.cal')}</Text>
             </View>
-            <View style={styles.statRow}>
-              <Text style={styles.statLabel}>Daily Average:</Text>
-              <Text style={styles.statValue}>{Math.round(data.average_daily_calories)} cal</Text>
+            <View style={[styles.statRow, isRTL && styles.statRowRTL]}>
+              <Text style={styles.statLabel}>{t('analytics.dailyAverage')}:</Text>
+              <Text style={styles.statValue}>{Math.round(data.average_daily_calories)} {t('analytics.cal')}</Text>
             </View>
-            <View style={styles.statRow}>
-              <Text style={styles.statLabel}>Logs:</Text>
+            <View style={[styles.statRow, isRTL && styles.statRowRTL]}>
+              <Text style={styles.statLabel}>{t('analytics.logs')}:</Text>
               <Text style={styles.statValue}>{data.log_count}</Text>
             </View>
           </View>
 
           <View style={styles.card}>
-            <Text style={styles.cardTitle}>Average Daily Macros</Text>
+            <Text style={styles.cardTitle}>{t('analytics.avgDailyMacros')}</Text>
             <View style={styles.macrosContainer}>
               <View style={styles.macroItem}>
                 <Text style={styles.macroValue}>
                   {Math.round(data.average_daily_nutrients?.proteins || 0)}g
                 </Text>
-                <Text style={styles.macroLabel}>Protein</Text>
+                <Text style={styles.macroLabel}>{t('nutrition.protein')}</Text>
               </View>
               <View style={styles.macroItem}>
                 <Text style={styles.macroValue}>
                   {Math.round(data.average_daily_nutrients?.carbs || 0)}g
                 </Text>
-                <Text style={styles.macroLabel}>Carbs</Text>
+                <Text style={styles.macroLabel}>{t('nutrition.carbs')}</Text>
               </View>
               <View style={styles.macroItem}>
                 <Text style={styles.macroValue}>
                   {Math.round(data.average_daily_nutrients?.fats || 0)}g
                 </Text>
-                <Text style={styles.macroLabel}>Fats</Text>
+                <Text style={styles.macroLabel}>{t('nutrition.fats')}</Text>
               </View>
             </View>
           </View>
 
           {period === 'week' && data.daily_breakdown && (
             <View style={styles.card}>
-              <Text style={styles.cardTitle}>Daily Breakdown</Text>
+              <Text style={styles.cardTitle}>{t('analytics.dailyBreakdown')}</Text>
               {data.daily_breakdown.map((day, index) => (
-                <View key={index} style={styles.dayRow}>
+                <View key={index} style={[styles.dayRow, isRTL && styles.dayRowRTL]}>
                   <Text style={styles.dayDate}>
                     {new Date(day.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
                   </Text>
-                  <Text style={styles.dayCalories}>{Math.round(day.calories)} cal</Text>
+                  <Text style={styles.dayCalories}>{Math.round(day.calories)} {t('analytics.cal')}</Text>
                 </View>
               ))}
             </View>
@@ -222,6 +226,9 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#f0f0f0',
   },
+  statRowRTL: {
+    flexDirection: 'row-reverse',
+  },
   statLabel: {
     fontSize: 16,
     color: '#666',
@@ -255,6 +262,9 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderBottomWidth: 1,
     borderBottomColor: '#f0f0f0',
+  },
+  dayRowRTL: {
+    flexDirection: 'row-reverse',
   },
   dayDate: {
     fontSize: 14,

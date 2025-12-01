@@ -13,24 +13,38 @@ export default function ProfileScreen() {
   const navigation = useNavigation();
   const [currentLanguage, setCurrentLanguage] = useState(i18n.language);
 
-  const changeLanguage = (lang) => {
-    const isRTL = lang === 'ar';
+  const changeLanguage = async (lang) => {
+    const isRTL = lang === 'ar' || lang === 'ur';
     const currentRTL = I18nManager.isRTL;
 
     // Change language first
     i18n.changeLanguage(lang);
     setCurrentLanguage(lang);
 
-    // If RTL setting needs to change, show message to restart app
+    // Get language name
+    const langNames = {
+      en: 'English',
+      ar: 'العربية',
+      ur: 'اردو'
+    };
+
+    // If RTL setting needs to change, show alert
     if (isRTL !== currentRTL) {
-      I18nManager.forceRTL(isRTL);
       Alert.alert(
         t('success'),
-        `${t('languageChanged')} ${lang === 'en' ? 'English' : 'العربية'}. Please restart the app for RTL to take effect.`
+        `${t('languageChanged')} ${langNames[lang]}. Please restart the app for RTL support.`,
+        [
+          {
+            text: 'OK',
+            onPress: () => {
+              I18nManager.forceRTL(isRTL);
+              // User needs to manually restart the app
+            },
+          },
+        ]
       );
     } else {
-      const langName = lang === 'en' ? 'English' : 'العربية';
-      Alert.alert(t('success'), `${t('languageChanged')} ${langName}`);
+      Alert.alert(t('success'), `${t('languageChanged')} ${langNames[lang]}`);
     }
   };
 
@@ -69,8 +83,9 @@ export default function ProfileScreen() {
               onValueChange={(value) => changeLanguage(value)}
               style={styles.picker}
             >
-              <Picker.Item label="English" value="en" />
-              <Picker.Item label="العربية" value="ar" />
+              <Picker.Item label="🇬🇧 English" value="en" />
+              <Picker.Item label="🇸🇦 العربية" value="ar" />
+              <Picker.Item label="🇵🇰 اردو" value="ur" />
             </Picker>
           </View>
         </View>
@@ -205,7 +220,7 @@ const styles = StyleSheet.create({
     height: 50,
   },
   editButton: {
-    backgroundColor: colors.secondary,
+    backgroundColor: colors.primary,
     marginHorizontal: spacing.base,
     marginTop: spacing.base,
     padding: spacing.base,
@@ -219,16 +234,18 @@ const styles = StyleSheet.create({
     fontWeight: typography.semibold,
   },
   logoutButton: {
-    backgroundColor: colors.error,
+    backgroundColor: colors.white,
     marginHorizontal: spacing.base,
     marginTop: spacing.md,
     padding: spacing.base,
     borderRadius: borderRadius.lg,
     alignItems: 'center',
-    ...shadows.base,
+    borderWidth: 2,
+    borderColor: colors.error,
+    ...shadows.sm,
   },
   logoutButtonText: {
-    color: colors.textOnPrimary,
+    color: colors.error,
     fontSize: typography.base,
     fontWeight: typography.semibold,
   },

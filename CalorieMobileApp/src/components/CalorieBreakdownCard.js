@@ -8,7 +8,7 @@ export default function CalorieBreakdownCard({ breakdown = [] }) {
   return (
     <Card>
       <View style={styles.header}>
-        <Text style={styles.title}>🍽️ Food Breakdown</Text>
+        <Text style={styles.title}>Food Breakdown</Text>
         <View style={styles.totalBadge}>
           <Text style={styles.totalText}>{Math.round(totalCalories)} cal</Text>
         </View>

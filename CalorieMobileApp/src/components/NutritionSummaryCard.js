@@ -9,14 +9,14 @@ export default function NutritionSummaryCard({
   fats = 0 
 }) {
   const macros = [
-    { name: 'Protein', value: protein, unit: 'g', color: '#FF6B6B', icon: '🥩' },
-    { name: 'Carbs', value: carbs, unit: 'g', color: '#4ECDC4', icon: '🍞' },
-    { name: 'Fats', value: fats, unit: 'g', color: '#FFE66D', icon: '🥑' },
+    { name: 'Protein', value: protein, unit: 'g', color: '#FF6B6B' },
+    { name: 'Carbs', value: carbs, unit: 'g', color: '#4ECDC4' },
+    { name: 'Fats', value: fats, unit: 'g', color: '#FFE66D' },
   ];
 
   return (
     <Card>
-      <Text style={styles.title}>📊 Nutrition Summary</Text>
+      <Text style={styles.title}>Nutrition Summary</Text>
       
       <View style={styles.calorieSection}>
         <Text style={styles.calorieValue}>{Math.round(calories)}</Text>
@@ -26,7 +26,6 @@ export default function NutritionSummaryCard({
       <View style={styles.macrosContainer}>
         {macros.map((macro, index) => (
           <View key={index} style={styles.macroItem}>
-            <Text style={styles.macroIcon}>{macro.icon}</Text>
             <Text style={styles.macroValue}>
               {Math.round(macro.value)}
               <Text style={styles.macroUnit}>{macro.unit}</Text>

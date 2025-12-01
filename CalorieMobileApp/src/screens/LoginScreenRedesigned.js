@@ -10,41 +10,21 @@ import {
   Platform,
   ScrollView,
   ActivityIndicator,
-  I18nManager,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../context/AuthContext';
 import { colors, typography, spacing, borderRadius, shadows } from '../styles/theme';
 
 export default function LoginScreen({ navigation }) {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [selectedLanguage, setSelectedLanguage] = useState(i18n.language);
   const { login } = useAuth();
-
-  const changeLanguage = async (lang) => {
-    setSelectedLanguage(lang);
-    await i18n.changeLanguage(lang);
-    
-    // Set RTL for Arabic
-    const isRTL = lang === 'ar';
-    if (I18nManager.isRTL !== isRTL) {
-      I18nManager.forceRTL(isRTL);
-      // Show alert to restart app
-      Alert.alert(
-        lang === 'ar' ? 'تم تغيير اللغة' : 'Language Changed',
-        lang === 'ar' ? 'يرجى إعادة تشغيل التطبيق لتطبيق التغييرات' : 'Please restart the app to apply changes',
-        [{ text: lang === 'ar' ? 'حسناً' : 'OK' }]
-      );
-    }
-  };
 
   const handleLogin = async () => {
     if (!email || !password) {
-      Alert.alert(t('common.error'), t('auth.fillAllFields'));
+      Alert.alert(t('error'), 'Please fill in all fields');
       return;
     }
 
@@ -53,7 +33,7 @@ export default function LoginScreen({ navigation }) {
     setLoading(false);
 
     if (!result.success) {
-      Alert.alert(t('auth.loginFailed'), result.error);
+      Alert.alert('Login Failed', result.error);
     }
   };
 
@@ -63,49 +43,16 @@ export default function LoginScreen({ navigation }) {
       style={styles.container}
     >
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        {/* Language Selector */}
-        <View style={styles.languageSelector}>
-          <TouchableOpacity
-            style={[styles.langButton, selectedLanguage === 'en' && styles.langButtonActive]}
-            onPress={() => changeLanguage('en')}
-          >
-            <Ionicons 
-              name="language" 
-              size={20} 
-              color={selectedLanguage === 'en' ? colors.white : colors.primary}
-              style={styles.langIcon}
-            />
-            <Text style={[styles.langText, selectedLanguage === 'en' && styles.langTextActive]}>
-              English
-            </Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity
-            style={[styles.langButton, selectedLanguage === 'ar' && styles.langButtonActive]}
-            onPress={() => changeLanguage('ar')}
-          >
-            <Ionicons 
-              name="language" 
-              size={20} 
-              color={selectedLanguage === 'ar' ? colors.white : colors.primary}
-              style={styles.langIcon}
-            />
-            <Text style={[styles.langText, selectedLanguage === 'ar' && styles.langTextActive]}>
-              العربية
-            </Text>
-          </TouchableOpacity>
-        </View>
-
         <View style={styles.header}>
-          <Text style={styles.title}>{t('auth.login')}</Text>
-          <Text style={styles.subtitle}>{t('auth.subtitle')}</Text>
+          <Text style={styles.title}>Calorie Tracker</Text>
+          <Text style={styles.subtitle}>Track your nutrition, reach your goals</Text>
         </View>
 
         <View style={styles.form}>
-          <Text style={styles.label}>{t('auth.email')}</Text>
+          <Text style={styles.label}>{t('email')}</Text>
           <TextInput
             style={styles.input}
-            placeholder={t('auth.email')}
+            placeholder={t('email')}
             value={email}
             onChangeText={setEmail}
             keyboardType="email-address"
@@ -113,10 +60,10 @@ export default function LoginScreen({ navigation }) {
             autoCorrect={false}
           />
 
-          <Text style={styles.label}>{t('auth.password')}</Text>
+          <Text style={styles.label}>{t('password')}</Text>
           <TextInput
             style={styles.input}
-            placeholder={t('auth.password')}
+            placeholder={t('password')}
             value={password}
             onChangeText={setPassword}
             secureTextEntry
@@ -131,14 +78,14 @@ export default function LoginScreen({ navigation }) {
             {loading ? (
               <ActivityIndicator color={colors.white} />
             ) : (
-              <Text style={styles.buttonText}>{t('auth.login')}</Text>
+              <Text style={styles.buttonText}>{t('login')}</Text>
             )}
           </TouchableOpacity>
 
           <View style={styles.footer}>
-            <Text style={styles.footerText}>{t('auth.dontHaveAccount')} </Text>
+            <Text style={styles.footerText}>Don't have an account? </Text>
             <TouchableOpacity onPress={() => navigation.navigate('Register')}>
-              <Text style={styles.linkText}>{t('auth.register')}</Text>
+              <Text style={styles.linkText}>{t('register')}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -156,36 +103,6 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     justifyContent: 'center',
     padding: spacing.lg,
-  },
-  languageSelector: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginBottom: spacing.xl,
-  },
-  langButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
-    borderRadius: borderRadius.full,
-    borderWidth: 2,
-    borderColor: colors.primary,
-    backgroundColor: colors.white,
-    marginHorizontal: spacing.xs,
-  },
-  langIcon: {
-    marginRight: spacing.sm,
-  },
-  langButtonActive: {
-    backgroundColor: colors.primary,
-  },
-  langText: {
-    fontSize: typography.base,
-    fontWeight: typography.semibold,
-    color: colors.primary,
-  },
-  langTextActive: {
-    color: colors.white,
   },
   header: {
     alignItems: 'center',

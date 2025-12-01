@@ -34,14 +34,20 @@ api.interceptors.request.use(
 // Add response interceptor for debugging and token handling
 api.interceptors.response.use(
   (response) => {
-    console.log('Response received:', response.status);
+    // Only log successful responses in development
+    // console.log('✅ Response:', response.status);
     return response;
   },
   async (error) => {
-    console.error('Response error:', error.message);
+    // Don't log "not food" errors - they're expected behavior
+    if (error.response?.status === 400 && error.response?.data?.is_food === false) {
+      // This is expected - user took photo of non-food item
+      return Promise.reject(error);
+    }
+    
+    // Log other errors for debugging
     if (error.response) {
-      console.error('Error status:', error.response.status);
-      console.error('Error data:', error.response.data);
+      console.log('⚠️ API Error:', error.response.status, error.response.data?.error || error.message);
       
       // Handle JWT signature verification failed (422 or 401)
       if (error.response.status === 422 || error.response.status === 401) {

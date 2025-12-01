@@ -168,7 +168,7 @@ export default function CameraScannerScreen({ navigation }) {
           </View>
 
           <View style={styles.detectedCard}>
-            <Text style={styles.cardTitle}>🍽️ Detected Foods</Text>
+            <Text style={styles.cardTitle}>Detected Foods</Text>
             {result.breakdown && result.breakdown.map((item, index) => (
               <View key={index} style={styles.foodItem}>
                 <Text style={styles.foodName}>{item.name}</Text>

@@ -26,21 +26,33 @@ export default function ImprovedCameraScannerScreen({ navigation }) {
   const requestPermissions = async () => {
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
     if (status !== 'granted') {
-      Alert.alert(t('common.error'), t('scanner.permissionRequired'));
+      Alert.alert('Permission Required', 'Camera permission is needed to scan food.');
       return false;
     }
     return true;
   };
 
-  const takePhoto = () => {
-    navigation.navigate('LiveCamera', {
-      onPhotoTaken: async (photoUri) => {
-        setImage(photoUri);
+  const takePhoto = async () => {
+    const hasPermission = await requestPermissions();
+    if (!hasPermission) return;
+
+    try {
+      const result = await ImagePicker.launchCameraAsync({
+        mediaTypes: ['images'],
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 0.8,
+      });
+
+      if (!result.canceled) {
+        setImage(result.assets[0].uri);
         setResult(null);
         setRetryCount(0);
-        await analyzeImage(photoUri);
-      },
-    });
+        await analyzeImage(result.assets[0].uri);
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Failed to open camera.');
+    }
   };
 
   const pickImage = async () => {
@@ -59,7 +71,7 @@ export default function ImprovedCameraScannerScreen({ navigation }) {
         await analyzeImage(result.assets[0].uri);
       }
     } catch (error) {
-      Alert.alert(t('common.error'), t('scanner.failedToPickImage'));
+      Alert.alert('Error', 'Failed to pick image.');
     }
   };
 
@@ -79,7 +91,6 @@ export default function ImprovedCameraScannerScreen({ navigation }) {
 
       // Add language parameter for Arabic response
       const currentLang = i18n.language;
-      formData.append('language', currentLang);
       
       const response = await foodAPI.analyzeFoodImage(formData);
       
@@ -93,15 +104,15 @@ export default function ImprovedCameraScannerScreen({ navigation }) {
     } catch (error) {
       if (error.response?.status === 400 && error.response?.data?.is_food === false) {
         Alert.alert(
-          t('scanner.notFood'),
-          t('scanner.notFoodMessage'),
+          'Not Food Related',
+          'This doesn\'t look like food. Please take a photo of your meal.',
           [
-            { text: t('scanner.takeAnother'), onPress: () => {
+            { text: 'Take Another Photo', onPress: () => {
               setImage(null);
               setResult(null);
               takePhoto();
             }},
-            { text: t('common.cancel'), style: 'cancel', onPress: () => {
+            { text: 'Cancel', style: 'cancel', onPress: () => {
               setImage(null);
               setResult(null);
             }}
@@ -116,11 +127,11 @@ export default function ImprovedCameraScannerScreen({ navigation }) {
         setTimeout(() => analyzeImage(imageUri, true), 1000);
       } else {
         Alert.alert(
-          t('scanner.analysisFailed'),
-          t('scanner.analysisFailedMessage'),
+          'Analysis Failed',
+          'Unable to analyze the image. Please try with a clearer photo.',
           [
-            { text: t('scanner.tryAgain'), onPress: () => analyzeImage(imageUri) },
-            { text: t('common.cancel'), style: 'cancel' }
+            { text: 'Try Again', onPress: () => analyzeImage(imageUri) },
+            { text: 'Cancel', style: 'cancel' }
           ]
         );
       }
@@ -148,20 +159,20 @@ export default function ImprovedCameraScannerScreen({ navigation }) {
       await foodAPI.addFoodLog(foodData);
       
       Alert.alert(
-        t('common.success'),
-        t('scanner.foodSaved'),
-        [{ text: t('common.ok'), onPress: () => navigation.navigate('Home') }]
+        'Success',
+        'Food logged successfully!',
+        [{ text: 'OK', onPress: () => navigation.navigate('Home') }]
       );
     } catch (error) {
-      Alert.alert(t('common.error'), t('common.failedToLogFood'));
+      Alert.alert('Error', 'Failed to save food log.');
     }
   };
 
   return (
     <View style={styles.container}>
       <StickyHeader 
-        title={t('scanner.title')}
-        subtitle={t('scanner.subtitle')}
+        title={t('foodScanner')}
+        subtitle={t('aiPoweredNutrition')}
         showBackButton={true}
       />
       
@@ -170,7 +181,7 @@ export default function ImprovedCameraScannerScreen({ navigation }) {
           <View style={styles.loadingCard}>
             <ActivityIndicator size="large" color={colors.primary} />
             <Text style={styles.loadingText}>
-              {retryCount > 0 ? `${t('scanner.retrying')}... (${retryCount}/2)` : t('scanner.analyzing')}
+              {retryCount > 0 ? `${t('retrying')}... (${retryCount}/2)` : t('analyzingFood')}
             </Text>
           </View>
         </View>
@@ -182,11 +193,11 @@ export default function ImprovedCameraScannerScreen({ navigation }) {
           <View style={styles.buttonContainer}>
             <TouchableOpacity style={styles.primaryButton} onPress={takePhoto}>
               <Ionicons name="camera" size={24} color={colors.white} />
-              <Text style={styles.primaryButtonText}>{t('scanner.takePhoto')}</Text>
+              <Text style={styles.primaryButtonText}>{t('takePhoto')}</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.secondaryButton} onPress={pickImage}>
               <Ionicons name="images" size={24} color={colors.primary} />
-              <Text style={styles.secondaryButtonText}>{t('scanner.chooseGallery')}</Text>
+              <Text style={styles.secondaryButtonText}>{t('chooseFromGallery')}</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -197,7 +208,7 @@ export default function ImprovedCameraScannerScreen({ navigation }) {
             <Image source={{ uri: image }} style={styles.image} />
             {!analyzing && !result && (
               <TouchableOpacity style={styles.retryButton} onPress={() => analyzeImage(image)}>
-                <Text style={styles.retryButtonText}>{t('scanner.analyzeAgain')}</Text>
+                <Text style={styles.retryButtonText}>Analyze Again</Text>
               </TouchableOpacity>
             )}
           </View>
@@ -207,30 +218,30 @@ export default function ImprovedCameraScannerScreen({ navigation }) {
         {result && !analyzing && (
           <>
             <View style={styles.card}>
-              <Text style={styles.cardTitle}>{t('scanner.nutritionSummary')}</Text>
+              <Text style={styles.cardTitle}>{t('nutritionInformation')}</Text>
               <View style={styles.nutritionGrid}>
                 <View style={styles.nutritionItem}>
                   <Text style={styles.nutritionValue}>{Math.round(result.total_calories)}</Text>
-                  <Text style={styles.nutritionLabel}>{t('nutrition.calories')}</Text>
+                  <Text style={styles.nutritionLabel}>Calories</Text>
                 </View>
                 <View style={styles.nutritionItem}>
                   <Text style={styles.nutritionValue}>{Math.round(result.total_protein || 0)}g</Text>
-                  <Text style={styles.nutritionLabel}>{t('nutrition.protein')}</Text>
+                  <Text style={styles.nutritionLabel}>Protein</Text>
                 </View>
                 <View style={styles.nutritionItem}>
                   <Text style={styles.nutritionValue}>{Math.round(result.total_carbs || 0)}g</Text>
-                  <Text style={styles.nutritionLabel}>{t('nutrition.carbs')}</Text>
+                  <Text style={styles.nutritionLabel}>Carbs</Text>
                 </View>
                 <View style={styles.nutritionItem}>
                   <Text style={styles.nutritionValue}>{Math.round(result.total_fats || 0)}g</Text>
-                  <Text style={styles.nutritionLabel}>{t('nutrition.fats')}</Text>
+                  <Text style={styles.nutritionLabel}>Fats</Text>
                 </View>
               </View>
             </View>
 
             {result.labels && result.labels.length > 0 && (
               <View style={styles.card}>
-                <Text style={styles.cardTitle}>{t('scanner.detectedItems')}</Text>
+                <Text style={styles.cardTitle}>{t('detectedItems')}</Text>
                 <View style={styles.labelsContainer}>
                   {result.labels.map((label, index) => (
                     <View key={index} style={styles.labelChip}>
@@ -244,11 +255,11 @@ export default function ImprovedCameraScannerScreen({ navigation }) {
             <View style={styles.actionContainer}>
               <TouchableOpacity style={styles.primaryButton} onPress={saveToLog}>
                 <Ionicons name="checkmark-circle" size={24} color={colors.white} />
-                <Text style={styles.primaryButtonText}>{t('scanner.saveToLog')}</Text>
+                <Text style={styles.primaryButtonText}>{t('saveToFoodLog')}</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.secondaryButton} onPress={takePhoto}>
                 <Ionicons name="camera" size={24} color={colors.primary} />
-                <Text style={styles.secondaryButtonText}>{t('scanner.scanAnother')}</Text>
+                <Text style={styles.secondaryButtonText}>{t('scanAnotherMeal')}</Text>
               </TouchableOpacity>
             </View>
           </>
@@ -257,22 +268,22 @@ export default function ImprovedCameraScannerScreen({ navigation }) {
         {/* Tips */}
         {!image && !analyzing && (
           <View style={styles.card}>
-            <Text style={styles.cardTitle}>{t('scanner.tipsTitle')}</Text>
+            <Text style={styles.cardTitle}>{t('tipsForBestResults')}</Text>
             <View style={styles.tipItem}>
               <Ionicons name="sunny" size={20} color={colors.primary} />
-              <Text style={styles.tipText}>{t('scanner.tipLighting')}</Text>
+              <Text style={styles.tipText}>{t('useGoodLighting')}</Text>
             </View>
             <View style={styles.tipItem}>
               <Ionicons name="arrow-down" size={20} color={colors.primary} />
-              <Text style={styles.tipText}>{t('scanner.tipAngle')}</Text>
+              <Text style={styles.tipText}>{t('takePhotoFromAbove')}</Text>
             </View>
             <View style={styles.tipItem}>
               <Ionicons name="eye" size={20} color={colors.primary} />
-              <Text style={styles.tipText}>{t('scanner.tipVisible')}</Text>
+              <Text style={styles.tipText}>{t('keepFoodClearlyVisible')}</Text>
             </View>
             <View style={styles.tipItem}>
               <Ionicons name="image" size={20} color={colors.primary} />
-              <Text style={styles.tipText}>{t('scanner.tipQuality')}</Text>
+              <Text style={styles.tipText}>{t('avoidShadowsAndBlur')}</Text>
             </View>
           </View>
         )}

@@ -83,7 +83,7 @@ export default function HomeScreen() {
   return (
     <View style={styles.container}>
       <StickyHeader 
-        title={`${t('home.welcome')}, ${user?.name || 'User'}!`}
+        title={`${t('hello')}, ${user?.name || 'User'}!`}
         subtitle={new Date().toLocaleDateString('en-US', { 
           weekday: 'long', 
           month: 'short', 
@@ -96,7 +96,7 @@ export default function HomeScreen() {
       >
         {/* Calorie Card */}
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>{t('home.todayCalories')}</Text>
+          <Text style={styles.cardTitle}>{t('todaysCalories')}</Text>
           
           <View style={styles.progressContainer}>
             <ProgressCircle 
@@ -109,14 +109,14 @@ export default function HomeScreen() {
           <View style={styles.statsRow}>
             <View style={styles.statBox}>
               <Text style={styles.statValue}>{Math.round(caloriesGoal)}</Text>
-              <Text style={styles.statLabel}>{t('home.calorieGoal')}</Text>
+              <Text style={styles.statLabel}>{t('goal')}</Text>
             </View>
             <View style={styles.statBox}>
               <Text style={[styles.statValue, caloriesRemaining < 0 && styles.overLimit]}>
                 {Math.abs(Math.round(caloriesRemaining))}
               </Text>
               <Text style={styles.statLabel}>
-                {caloriesRemaining >= 0 ? t('home.remaining') : t('home.remaining')}
+                {caloriesRemaining >= 0 ? t('remaining') : t('over')}
               </Text>
             </View>
           </View>
@@ -125,19 +125,19 @@ export default function HomeScreen() {
         {/* Macros Card */}
         {dailySummary && (
           <View style={styles.card}>
-            <Text style={styles.cardTitle}>{t('nutrition.macronutrients')}</Text>
+            <Text style={styles.cardTitle}>{t('macronutrients')}</Text>
             <View style={styles.macrosRow}>
               <View style={styles.macroBox}>
                 <Text style={styles.macroValue}>{Math.round(dailySummary.proteins || 0)}g</Text>
-                <Text style={styles.macroLabel}>{t('nutrition.protein')}</Text>
+                <Text style={styles.macroLabel}>{t('protein')}</Text>
               </View>
               <View style={styles.macroBox}>
                 <Text style={styles.macroValue}>{Math.round(dailySummary.carbs || 0)}g</Text>
-                <Text style={styles.macroLabel}>{t('nutrition.carbs')}</Text>
+                <Text style={styles.macroLabel}>{t('carbs')}</Text>
               </View>
               <View style={styles.macroBox}>
                 <Text style={styles.macroValue}>{Math.round(dailySummary.fats || 0)}g</Text>
-                <Text style={styles.macroLabel}>{t('nutrition.fats')}</Text>
+                <Text style={styles.macroLabel}>{t('fats')}</Text>
               </View>
             </View>
           </View>
@@ -167,15 +167,15 @@ export default function HomeScreen() {
         {/* Meals */}
         <View style={styles.card}>
           <View style={styles.cardHeader}>
-            <Text style={styles.cardTitle}>{t('home.todayMeals')} ({foodLogs.length})</Text>
+            <Text style={styles.cardTitle}>{t('todaysMeals')} ({foodLogs.length})</Text>
             {foodLogs.length > 3 && (
               <TouchableOpacity onPress={() => navigation.navigate('AllMeals')}>
-                <Text style={styles.viewAllText}>{t('home.viewAllMeals')}</Text>
+                <Text style={styles.viewAllText}>{t('viewAll')}</Text>
               </TouchableOpacity>
             )}
           </View>
           {foodLogs.length === 0 ? (
-            <Text style={styles.emptyText}>{t('home.noMeals')}</Text>
+            <Text style={styles.emptyText}>{t('noMealsLogged')}</Text>
           ) : (
             foodLogs.slice(0, 3).map((log) => (
               <View key={log.id} style={styles.mealItem}>

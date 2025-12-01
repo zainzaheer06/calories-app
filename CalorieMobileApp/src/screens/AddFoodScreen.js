@@ -10,9 +10,11 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
+import { useTranslation } from 'react-i18next';
 import { foodAPI } from '../services/api';
 
 export default function AddFoodScreen({ navigation }) {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     food_name: '',
     serving_size: '',
@@ -30,7 +32,7 @@ export default function AddFoodScreen({ navigation }) {
 
   const handleAddFood = async () => {
     if (!formData.food_name || !formData.serving_size || !formData.calories) {
-      Alert.alert('Error', 'Please fill in required fields (name, serving size, calories)');
+      Alert.alert(t('common.error'), t('common.fillRequiredFields'));
       return;
     }
 
@@ -51,8 +53,8 @@ export default function AddFoodScreen({ navigation }) {
       console.log('Logging food:', foodData);
       await foodAPI.addFoodLog(foodData);
       
-      Alert.alert('Success', 'Food logged successfully!', [
-        { text: 'OK', onPress: () => {
+      Alert.alert(t('common.success'), t('common.foodLoggedSuccess'), [
+        { text: t('common.ok'), onPress: () => {
           setFormData({
             food_name: '',
             serving_size: '',
@@ -68,7 +70,7 @@ export default function AddFoodScreen({ navigation }) {
     } catch (error) {
       console.error('Error logging food:', error);
       console.error('Error response:', error.response?.data);
-      Alert.alert('Error', error.response?.data?.error || 'Failed to log food');
+      Alert.alert(t('common.error'), error.response?.data?.error || t('common.failedToLogFood'));
     } finally {
       setLoading(false);
     }
@@ -77,42 +79,42 @@ export default function AddFoodScreen({ navigation }) {
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Add Food</Text>
-        <Text style={styles.subtitle}>Log your meal manually</Text>
+        <Text style={styles.title}>{t('addFood.title')}</Text>
+        <Text style={styles.subtitle}>{t('manualEntry')}</Text>
       </View>
 
       <View style={styles.form}>
-        <Text style={styles.label}>Food Name *</Text>
+        <Text style={styles.label}>{t('addFood.foodName')} *</Text>
         <TextInput
           style={styles.input}
-          placeholder="e.g., Grilled Chicken Breast"
+          placeholder={t('addFood.foodName')}
           value={formData.food_name}
           onChangeText={(value) => updateField('food_name', value)}
         />
 
-        <Text style={styles.label}>Serving Size (grams) *</Text>
+        <Text style={styles.label}>{t('addFood.servingSize')} *</Text>
         <TextInput
           style={styles.input}
-          placeholder="e.g., 150"
+          placeholder="150"
           value={formData.serving_size}
           onChangeText={(value) => updateField('serving_size', value)}
           keyboardType="decimal-pad"
         />
 
-        <Text style={styles.label}>Calories *</Text>
+        <Text style={styles.label}>{t('addFood.calories')} *</Text>
         <TextInput
           style={styles.input}
-          placeholder="e.g., 165"
+          placeholder="165"
           value={formData.calories}
           onChangeText={(value) => updateField('calories', value)}
           keyboardType="decimal-pad"
         />
 
-        <Text style={styles.sectionTitle}>Macronutrients (optional)</Text>
+        <Text style={styles.sectionTitle}>{t('nutrition.macronutrients')}</Text>
 
         <View style={styles.row}>
           <View style={styles.thirdWidth}>
-            <Text style={styles.label}>Protein (g)</Text>
+            <Text style={styles.label}>{t('addFood.protein')}</Text>
             <TextInput
               style={styles.input}
               placeholder="0"
@@ -123,7 +125,7 @@ export default function AddFoodScreen({ navigation }) {
           </View>
 
           <View style={styles.thirdWidth}>
-            <Text style={styles.label}>Carbs (g)</Text>
+            <Text style={styles.label}>{t('addFood.carbs')}</Text>
             <TextInput
               style={styles.input}
               placeholder="0"
@@ -134,7 +136,7 @@ export default function AddFoodScreen({ navigation }) {
           </View>
 
           <View style={styles.thirdWidth}>
-            <Text style={styles.label}>Fats (g)</Text>
+            <Text style={styles.label}>{t('addFood.fats')}</Text>
             <TextInput
               style={styles.input}
               placeholder="0"
@@ -145,17 +147,17 @@ export default function AddFoodScreen({ navigation }) {
           </View>
         </View>
 
-        <Text style={styles.label}>Meal Type</Text>
+        <Text style={styles.label}>{t('addFood.mealType')}</Text>
         <View style={styles.pickerContainer}>
           <Picker
             selectedValue={formData.meal_type}
             onValueChange={(value) => updateField('meal_type', value)}
             style={styles.picker}
           >
-            <Picker.Item label="Breakfast" value="breakfast" />
-            <Picker.Item label="Lunch" value="lunch" />
-            <Picker.Item label="Dinner" value="dinner" />
-            <Picker.Item label="Snack" value="snack" />
+            <Picker.Item label={t('addFood.breakfast')} value="breakfast" />
+            <Picker.Item label={t('addFood.lunch')} value="lunch" />
+            <Picker.Item label={t('addFood.dinner')} value="dinner" />
+            <Picker.Item label={t('addFood.snack')} value="snack" />
           </Picker>
         </View>
 
@@ -167,7 +169,7 @@ export default function AddFoodScreen({ navigation }) {
           {loading ? (
             <ActivityIndicator color="#fff" />
           ) : (
-            <Text style={styles.buttonText}>Log Food</Text>
+            <Text style={styles.buttonText}>{t('addToLog')}</Text>
           )}
         </TouchableOpacity>
       </View>

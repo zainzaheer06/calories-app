@@ -1,5 +1,6 @@
 import React from 'react';
 import { TouchableOpacity, Text, StyleSheet, ActivityIndicator } from 'react-native';
+import { colors, typography, spacing, borderRadius, shadows } from '../styles/theme';
 
 export default function Button({ 
   title, 
@@ -32,7 +33,7 @@ export default function Button({
       activeOpacity={0.7}
     >
       {loading ? (
-        <ActivityIndicator color={variant === 'outline' ? '#4CAF50' : '#fff'} />
+        <ActivityIndicator color={variant === 'outline' ? colors.primary : colors.white} />
       ) : (
         <>
           {icon && <Text style={styles.icon}>{icon}</Text>}
@@ -48,46 +49,38 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 16,
-    paddingHorizontal: 24,
-    borderRadius: 12,
+    paddingVertical: spacing.base,
+    paddingHorizontal: spacing.lg,
+    borderRadius: borderRadius.lg,
     minHeight: 56,
   },
   primaryButton: {
-    backgroundColor: '#4CAF50',
-    shadowColor: '#4CAF50',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 4,
+    backgroundColor: colors.primary,
+    ...shadows.base,
   },
   secondaryButton: {
-    backgroundColor: '#2196F3',
-    shadowColor: '#2196F3',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 4,
+    backgroundColor: colors.secondary,
+    ...shadows.base,
   },
   outlineButton: {
     backgroundColor: 'transparent',
     borderWidth: 2,
-    borderColor: '#4CAF50',
+    borderColor: colors.primary,
   },
   disabledButton: {
     opacity: 0.5,
   },
   buttonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '700',
+    color: colors.textOnPrimary,
+    fontSize: typography.base,
+    fontWeight: typography.bold,
     letterSpacing: 0.5,
   },
   outlineText: {
-    color: '#4CAF50',
+    color: colors.primary,
   },
   icon: {
-    fontSize: 20,
-    marginRight: 8,
+    fontSize: typography.lg,
+    marginRight: spacing.sm,
   },
 });

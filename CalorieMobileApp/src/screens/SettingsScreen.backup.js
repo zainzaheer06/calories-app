@@ -17,9 +17,10 @@ import StickyHeader from '../components/StickyHeader';
 import { colors, typography, spacing, borderRadius, shadows } from '../styles/theme';
 
 export default function SettingsScreen({ navigation }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { user, updateUser } = useAuth();
   const [loading, setLoading] = useState(false);
+  const [currentLanguage, setCurrentLanguage] = useState(i18n.language);
   const [formData, setFormData] = useState({
     name: '',
     age: '',
@@ -48,6 +49,13 @@ export default function SettingsScreen({ navigation }) {
 
   const updateField = (field, value) => {
     setFormData({ ...formData, [field]: value });
+  };
+
+  const changeLanguage = (lang) => {
+    i18n.changeLanguage(lang);
+    setCurrentLanguage(lang);
+    const langName = lang === 'en' ? 'English' : 'العربية';
+    Alert.alert(t('success'), `${t('languageChanged')} ${langName}`);
   };
 
   const handleSave = async () => {
@@ -91,6 +99,29 @@ export default function SettingsScreen({ navigation }) {
         subtitle={t('editProfileGoals')}
       />
       <ScrollView style={styles.scrollContainer}>
+        {/* Language */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>🌐 {t('language')}</Text>
+          <View style={styles.languageButtons}>
+            <TouchableOpacity
+              style={[styles.langButton, currentLanguage === 'en' && styles.langButtonActive]}
+              onPress={() => changeLanguage('en')}
+            >
+              <Text style={[styles.langButtonText, currentLanguage === 'en' && styles.langButtonTextActive]}>
+                🇬🇧 English
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.langButton, currentLanguage === 'ar' && styles.langButtonActive]}
+              onPress={() => changeLanguage('ar')}
+            >
+              <Text style={[styles.langButtonText, currentLanguage === 'ar' && styles.langButtonTextActive]}>
+                🇸🇦 العربية
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
         {/* Personal Info */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>{t('personalInfo')}</Text>

@@ -6,17 +6,21 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ActivityIndicator, View, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
+// i18n
+import './src/i18n';
+
 // Screens
 import LoginScreen from './src/screens/LoginScreen';
 import RegisterScreen from './src/screens/RegisterScreen';
-import HomeScreen from './src/screens/HomeScreen';
-import ProfileScreen from './src/screens/ProfileScreen';
+import HomeScreen from './src/screens/HomeScreenRedesigned';
+import ProfileScreen from './src/screens/ProfileScreenRedesigned';
 import AddFoodScreen from './src/screens/AddFoodScreen';
 import AnalyticsScreen from './src/screens/AnalyticsScreen';
-import SettingsScreen from './src/screens/SettingsScreen';
+import SettingsScreen from './src/screens/SettingsScreenRedesigned';
 import AllMealsScreen from './src/screens/AllMealsScreen';
-import CameraScannerScreen from './src/screens/CameraScannerScreen';
+import CameraScannerScreen from './src/screens/CameraScannerRedesigned';
 import ImprovedCameraScannerScreen from './src/screens/ImprovedCameraScannerScreen';
+import LiveCameraScreen from './src/screens/LiveCameraScreen';
 
 // Context
 import { AuthProvider, useAuth } from './src/context/AuthContext';
@@ -37,10 +41,14 @@ function MainStack() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="MainTabs" component={MainTabs} />
-      <Stack.Screen name="Settings" component={SettingsScreen} />
+      <Stack.Screen 
+        name="Settings" 
+        component={SettingsScreen}
+      />
       <Stack.Screen name="AllMeals" component={AllMealsScreen} />
       <Stack.Screen name="CameraScanner" component={CameraScannerScreen} />
       <Stack.Screen name="ImprovedCameraScanner" component={ImprovedCameraScannerScreen} />
+      <Stack.Screen name="LiveCamera" component={LiveCameraScreen} options={{ headerShown: false }} />
     </Stack.Navigator>
   );
 }
