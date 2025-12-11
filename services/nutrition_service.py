@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 from sqlalchemy import func
-from app import db
+from database import db
 from models.food_log import FoodLog
 
 def calculate_daily_summary(user_id, target_date):

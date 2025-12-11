@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from datetime import datetime
-from app import db
+from database import db
 from models.user import User
 from utils.validators import validate_email, validate_password
 

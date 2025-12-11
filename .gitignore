@@ -34,3 +34,21 @@ Thumbs.db
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Build files
+CalorieMobileApp/android/
+CalorieMobileApp/ios/
+
+# Temporary files
+*.tmp
+*.temp
+*.jfif
+
+# Test files
+test_*.py
+test_*.js
+
+# Batch files (except essential ones)
+*.bat
+!allow_flask_firewall.bat
+!START_NGROK.bat

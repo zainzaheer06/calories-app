@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required
 from services.auth_service import get_current_user_id
-from app import db
+from database import db
 from models.user import User
 from models.food_log import FoodLog
 from datetime import datetime, timedelta, date

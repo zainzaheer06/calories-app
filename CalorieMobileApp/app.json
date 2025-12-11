@@ -14,7 +14,21 @@
       "bundleIdentifier": "com.calorietracker.app"
     },
     "android": {
-      "package": "com.calorietracker.app"
+      "package": "com.calorietracker.app",
+      "versionCode": 2,
+      "adaptiveIcon": {
+        "backgroundColor": "#4CAF50"
+      },
+      "permissions": [
+        "CAMERA",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE"
+      ]
+    },
+    "extra": {
+      "eas": {
+        "projectId": "46da76ee-d9fd-4618-b148-fbf8280c81c5"
+      }
     }
   }
 }

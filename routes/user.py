@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required
 from services.auth_service import get_current_user_id
-from app import db
+from database import db
 from models.user import User
 from models.food_log import FoodLog
 from models.custom_food import CustomFood
@@ -44,7 +44,11 @@ def get_user_profile():
             }
         })
         
-        return jsonify({'user': profile_data}), 200
+        # Return both 'user' and 'profile' keys for compatibility
+        return jsonify({
+            'user': profile_data,
+            'profile': profile_data
+        }), 200
         
     except Exception as e:
         return jsonify({
@@ -100,15 +104,19 @@ def update_user_profile():
         if updated_fields:
             db.session.commit()
             
+            user_data = user.to_dict()
             return jsonify({
                 'message': 'Profile updated successfully',
                 'updated_fields': updated_fields,
-                'user': user.to_dict()
+                'user': user_data,
+                'profile': user_data
             }), 200
         else:
+            user_data = user.to_dict()
             return jsonify({
                 'message': 'No changes detected',
-                'user': user.to_dict()
+                'user': user_data,
+                'profile': user_data
             }), 200
         
     except Exception as e:
@@ -158,15 +166,19 @@ def update_user_goals():
         if updated_fields:
             db.session.commit()
             
+            user_data = user.to_dict()
             return jsonify({
                 'message': 'Goals updated successfully',
                 'updated_fields': updated_fields,
-                'user': user.to_dict()
+                'user': user_data,
+                'profile': user_data
             }), 200
         else:
+            user_data = user.to_dict()
             return jsonify({
                 'message': 'No changes detected',
-                'user': user.to_dict()
+                'user': user_data,
+                'profile': user_data
             }), 200
         
     except Exception as e:

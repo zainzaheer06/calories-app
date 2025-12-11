@@ -8,10 +8,13 @@ from config import Config
 OPENAI_API_KEY = Config.OPENAI_API_KEY
 OPENAI_AVAILABLE = bool(OPENAI_API_KEY)
 
-def analyze_food_image(image_base64):
+def analyze_food_image(image_base64, language='en'):
     """
     Analyze food image using OpenAI Vision API
     Returns nutrition information and food identification
+    Args:
+        image_base64: Base64 encoded image
+        language: 'en' for English or 'ar' for Arabic
     """
 
     if not OPENAI_AVAILABLE:
@@ -34,9 +37,19 @@ def analyze_food_image(image_base64):
     try:
         print("🤖 Analyzing image with OpenAI Vision API...")
         
-        prompt = """IMPORTANT: First check if this image contains FOOD. If the image does NOT contain food (e.g., it's a person, car, building, landscape, etc.), respond with:
-{
-  "labels": ["not_food"],
+        # Set language-specific instructions
+        if language == 'ar':
+            lang_instruction = "IMPORTANT: Respond in Arabic. All food names and descriptions must be in Arabic."
+            not_food_label = "ليس طعاماً"
+        else:
+            lang_instruction = "IMPORTANT: Respond in English."
+            not_food_label = "not_food"
+        
+        prompt = f"""{lang_instruction}
+
+First check if this image contains FOOD. If the image does NOT contain food (e.g., it's a person, car, building, landscape, etc.), respond with:
+{{
+  "labels": ["{not_food_label}"],
   "breakdown": [],
   "total_calories": 0,
   "total_protein": 0,
@@ -44,17 +57,17 @@ def analyze_food_image(image_base64):
   "total_fats": 0,
   "confidence": 0.0,
   "is_food": false
-}
+}}
 
 If the image DOES contain food, analyze it and identify all food items visible.
 For each food item, estimate the calories based on visible portion size.
 
 Respond in this EXACT JSON format:
-{
+{{
   "labels": ["food1", "food2", "food3"],
   "breakdown": [
-    {"name": "food1", "calories": 100},
-    {"name": "food2", "calories": 150}
+    {{"name": "food1", "calories": 100}},
+    {{"name": "food2", "calories": 150}}
   ],
   "total_calories": 250,
   "total_protein": 10,
@@ -62,7 +75,7 @@ Respond in this EXACT JSON format:
   "total_fats": 8,
   "confidence": 0.85,
   "is_food": true
-}
+}}
 
 Be specific with food names. Estimate realistic portion sizes."""
 

@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required
 from datetime import datetime
-from app import db
+from database import db
 from models.food_log import FoodLog
 from models.custom_food import CustomFood
 from services.auth_service import get_current_user_id
@@ -35,9 +35,13 @@ def analyze_food_image_route():
         
         print(f"Image size: {len(image_data)} bytes")
         
+        # Get language from request (default to English)
+        language = request.form.get('language', 'en')
+        print(f"Analysis language: {language}")
+        
         # Analyze image with OpenAI
         from services.openai_service import analyze_food_image
-        analysis_result = analyze_food_image(image_base64)
+        analysis_result = analyze_food_image(image_base64, language=language)
         
         # Check if image is not food
         if analysis_result and analysis_result.get('is_food') == False:
