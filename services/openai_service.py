@@ -284,3 +284,164 @@ Keep response under 150 words, friendly and motivating."""
         print(f"OpenAI Error: {e}")
         # Fallback to mock insights
         return get_nutrition_advice(user_data, food_logs) if not OPENAI_AVAILABLE else f"Unable to generate insights: {str(e)}"
+
+def search_food_by_name(query, portion=''):
+    """Search for food by name and return nutrition information"""
+    if not OPENAI_AVAILABLE:
+        # Mock response for testing
+        return {
+            'food_name': query,
+            'calories_per_100g': 200,
+            'proteins_per_100g': 10,
+            'carbs_per_100g': 30,
+            'fats_per_100g': 5,
+            'confidence': 0.70
+        }
+    
+    try:
+        prompt = f"""Find nutrition information for: {query}
+        Portion: {portion if portion else 'standard serving'}
+        
+        Respond in this EXACT JSON format:
+        {{
+          "food_name": "{query}",
+          "calories_per_100g": 200,
+          "proteins_per_100g": 10,
+          "carbs_per_100g": 30,
+          "fats_per_100g": 5,
+          "fiber_per_100g": 3,
+          "confidence": 0.85
+        }}"""
+        
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {OPENAI_API_KEY}"
+        }
+        
+        payload = {
+            "model": "gpt-4o-mini",
+            "messages": [
+                {"role": "user", "content": prompt}
+            ],
+            "max_tokens": 300,
+            "temperature": 0.3
+        }
+        
+        response = requests.post(
+            "https://api.openai.com/v1/chat/completions",
+            headers=headers,
+            json=payload,
+            timeout=30
+        )
+        
+        if response.status_code == 200:
+            result_data = response.json()
+            result_text = result_data['choices'][0]['message']['content']
+            
+            # Extract JSON from response
+            import re
+            json_match = re.search(r'\{.*\}', result_text, re.DOTALL)
+            if json_match:
+                return json.loads(json_match.group())
+        
+        # Fallback
+        return {
+            'food_name': query,
+            'calories_per_100g': 200,
+            'proteins_per_100g': 10,
+            'carbs_per_100g': 30,
+            'fats_per_100g': 5,
+            'confidence': 0.50
+        }
+        
+    except Exception as e:
+        print(f"Search food error: {e}")
+        return {
+            'food_name': query,
+            'calories_per_100g': 200,
+            'proteins_per_100g': 10,
+            'carbs_per_100g': 30,
+            'fats_per_100g': 5,
+            'confidence': 0.50
+        }
+
+def analyze_recipe(recipe_text, servings=1):
+    """Analyze recipe and calculate nutrition per serving"""
+    if not OPENAI_AVAILABLE:
+        # Mock response for testing
+        return {
+            'recipe_name': 'Recipe Analysis',
+            'total_calories': 800,
+            'calories_per_serving': 800 // servings,
+            'servings': servings,
+            'ingredients_analyzed': ['ingredient1', 'ingredient2'],
+            'confidence': 0.70
+        }
+    
+    try:
+        prompt = f"""Analyze this recipe and calculate nutrition:
+        
+        Recipe: {recipe_text}
+        Servings: {servings}
+        
+        Respond in this EXACT JSON format:
+        {{
+          "recipe_name": "Recipe Name",
+          "total_calories": 800,
+          "total_proteins": 40,
+          "total_carbs": 100,
+          "total_fats": 20,
+          "calories_per_serving": 200,
+          "proteins_per_serving": 10,
+          "carbs_per_serving": 25,
+          "fats_per_serving": 5,
+          "servings": {servings},
+          "ingredients_analyzed": ["ingredient1", "ingredient2"],
+          "confidence": 0.85
+        }}"""
+        
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {OPENAI_API_KEY}"
+        }
+        
+        payload = {
+            "model": "gpt-4o-mini",
+            "messages": [
+                {"role": "user", "content": prompt}
+            ],
+            "max_tokens": 500,
+            "temperature": 0.3
+        }
+        
+        response = requests.post(
+            "https://api.openai.com/v1/chat/completions",
+            headers=headers,
+            json=payload,
+            timeout=30
+        )
+        
+        if response.status_code == 200:
+            result_data = response.json()
+            result_text = result_data['choices'][0]['message']['content']
+            
+            # Extract JSON from response
+            import re
+            json_match = re.search(r'\{.*\}', result_text, re.DOTALL)
+            if json_match:
+                return json.loads(json_match.group())
+        
+        # Fallback
+        return {
+            'recipe_name': 'Recipe Analysis',
+            'total_calories': 800,
+            'calories_per_serving': 800 // servings,
+            'servings': servings,
+            'confidence': 0.50
+        }
+        
+    except Exception as e:
+        print(f"Recipe analysis error: {e}")
+        return {
+            'error': str(e)
+        }

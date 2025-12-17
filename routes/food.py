@@ -5,6 +5,7 @@ from database import db
 from models.food_log import FoodLog
 from models.custom_food import CustomFood
 from services.auth_service import get_current_user_id
+from services import openai_service
 from utils.helpers import save_uploaded_image, allowed_file
 import os
 import json

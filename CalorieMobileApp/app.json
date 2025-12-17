@@ -2,10 +2,12 @@
   "expo": {
     "name": "Calorie Tracker",
     "slug": "calorie-mobile-app",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
+    "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
+      "image": "./assets/splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#4CAF50"
     },
@@ -15,8 +17,10 @@
     },
     "android": {
       "package": "com.calorietracker.app",
-      "versionCode": 2,
+      "versionCode": 3,
+      "icon": "./assets/icon.png",
       "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#4CAF50"
       },
       "permissions": [
